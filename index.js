@@ -1,17 +1,26 @@
+module.exports = function (team, dbTokens, authUrl) {
+
 require('dotenv').config();
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+var DataStore = require('@slack/client').MemoryDataStore;
+var dataStore = new DataStore();
 var Metamaps = require('./metamaps');
 var metacodes = Metamaps.metacodes;
-var tokens = {};
+var tokens = dbTokens;
 var mapsForChannel = {};
 var metacodesForChannel = {};
-var token = process.env.SLACK_TOKEN || '';
-var map = process.env.METAMAP_ID;
+var token = team.bot_access_token;
+var botId = team.bot_user_id;
 
-var rtm = new RtmClient(token, {logLevel: 'info'});
+var rtm = new RtmClient(token, {logLevel: 'info', dataStore: dataStore});
 rtm.start();
+
+function dmForUserId(userId) {
+  var channel = dataStore.getDMByName(dataStore.getUserById(userId).name).id;
+  return channel;
+}
 
 function getTopicsFromText(text) {
   var topics = [];
@@ -34,7 +43,7 @@ function messageContainsMetacodes(text) {
 }
 
 function postTopicsToMetamaps(topics, userId, channel) {
-  var addToMap = mapsForChannel[channel] || map;
+  var addToMap = mapsForChannel[channel];
   topics.forEach(function (topic) {
     Metamaps.addTopicToMap(addToMap, topic, tokens[userId], function (err, topicId, mappingId) {
       if (err == 'topic failed') {
@@ -48,10 +57,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
   });
 }
 
-var COMMANDS;
-
-rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
-  COMMANDS = [
+var COMMANDS = [
     {
       cmd: "token ",
       variable: "[TOKEN]",
@@ -153,7 +159,7 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
       }
     },
     {
-      cmd: "<@" + rtm.activeUserId + '>: help',
+      cmd: "<@" + botId + '>: help',
       variable: "",
       helpText: "list all the commands that metamapper knows",
       requireUser: false,
@@ -181,11 +187,11 @@ rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
       }
     }
   ];
-});
 
 function verified(message) {
   if (!tokens[message.user]) {
-    rtm.sendMessage('You haven\'t authenticated yet, please go to https://github.com/metamaps/create-from-slack and follow steps 5 and 6', message.channel);
+    var id = rtm.activeTeamId + message.user;
+    rtm.sendMessage('You haven\'t authenticated yet, please go to ' + authUrl + '?id=' + id, dmForUserId(message.user));
     return false;
   }
   return true;
@@ -205,3 +211,9 @@ rtm.on(RTM_EVENTS.MESSAGE, function (message) {
     }
   });
 });
+
+  return function addTokenForUser(userId, token) {
+    tokens[userId] = token;
+    rtm.sendMessage('Nice! You are now authorized with metamaps.', dmForUserId(userId)); 
+  }
+} // end module.exports

@@ -6,7 +6,7 @@
     "dotenv": "^2.0.0",
     "request": "^2.69.0"
   },
-  "main": "index.js"
+  "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
