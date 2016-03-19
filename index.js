@@ -1,11 +1,11 @@
-module.exports = function (team, dbTokens, authUrl, persistToken) {
+module.exports = function (team, dbTokens, authUrl, METAMAPS_URL, persistToken) {
 
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var DataStore = require('@slack/client').MemoryDataStore;
 var dataStore = new DataStore();
-var Metamaps = require('./metamaps');
+var Metamaps = require('./metamaps')(METAMAPS_URL);
 var tokens = dbTokens;
 var token = team.bot_access_token;
 var botId = team.bot_user_id;

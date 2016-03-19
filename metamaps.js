@@ -1,16 +1,16 @@
 var request = require('request');
-var rootUrl = 'https://metamaps.herokuapp.com/api/v1';
-var topicCreateUrl = rootUrl + '/topics';
-var mappingCreateUrl = rootUrl + '/mappings';
-var mapCreateUrl = rootUrl + '/maps';
-var mapUrl = rootUrl + '/maps/';
+var rootUrl,
+    topicCreateUrl,
+    mappingCreateUrl,
+    mapCreateUrl,
+    mapUrl;
 
 function randomCoord() {
   var min = -300, max = 300;
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-module.exports = {
+var toExport = {
   metacodes: [
     // first column is slack emoji name, second column is metacode id
         ['catalyst', 281110143],
@@ -155,4 +155,13 @@ module.exports = {
     
     return string;
   }
+}
+
+module.exports = function (METAMAPS_URL) {
+  rootUrl = METAMAPS_URL + '/api/v1';
+  topicCreateUrl = rootUrl + '/topics';
+  mappingCreateUrl = rootUrl + '/mappings';
+  mapCreateUrl = rootUrl + '/maps';
+  mapUrl = rootUrl + '/maps/';
+  return toExport;
 }
