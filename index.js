@@ -1,6 +1,5 @@
-module.exports = function (team, dbTokens, authUrl) {
+module.exports = function (team, dbTokens, authUrl, persistToken) {
 
-require('dotenv').config();
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
@@ -69,6 +68,7 @@ var COMMANDS = [
       run: function (message) {
         var userToken = message.text.substring(6);
         tokens[message.user] = userToken;
+        if (persistToken) persistToken(message.user, userToken);
         rtm.sendMessage('Ok, I\'ve set your token for use on metamaps', message.channel);
       }
     },
