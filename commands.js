@@ -1,5 +1,5 @@
-module.exports = function (rtm, tokens, persistToken, botId) {
-  var Metamaps = require('./metamaps.js');
+module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL) {
+  var Metamaps = require('./metamaps.js')(METAMAPS_URL);
   var metacodes = Metamaps.metacodes;
   var mapsForChannel = {};
   var metacodesForChannel = {};
@@ -136,6 +136,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
           return;
         }
         var topic_name = message.text.substring(4);
+console.log(metacodesForChannel[message.channel]);
         postTopicsToMetamaps([ 
           { metacode_id: metacodesForChannel[message.channel], name: topic_name.trim() } 
         ], message.user, message.channel);

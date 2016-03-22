@@ -60,16 +60,16 @@ var toExport = {
   ],
   findMetacodeByNameOrId: function (nameOrId) {
     var m;
-    module.exports.metacodes.forEach(function (metacode) {
+    toExport.metacodes.forEach(function (metacode) {
       if (metacode[0] === nameOrId || metacode[1] === nameOrId) m = metacode;
     });
     return m;
   },
   findMetacodeName: function (id) {
-    return module.exports.findMetacodeByNameOrId(id)[0];
+    return toExport.findMetacodeByNameOrId(id)[0];
   },
   findMetacodeId: function (name) {
-    return module.exports.findMetacodeByNameOrId(name)[1];
+    return toExport.findMetacodeByNameOrId(name)[1];
   },
   addTopicToMap: function (map, topic, token, callback) {
     topic.permission = 'commons';
@@ -150,7 +150,7 @@ var toExport = {
     var string = '';
     
     topics.forEach(function (t) {
-      string += ':' + module.exports.findMetacodeName(t.metacode_id) + ': ' + t.name + ' \n';
+      string += ':' + toExport.findMetacodeName(t.metacode_id) + ': ' + t.name + ' \n';
     });
     
     return string;
