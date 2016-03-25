@@ -2,43 +2,37 @@
 
 steps
 
-1. create a bot user for your slack team and copy the access token for it
+1. `npm install --save create-from-slack`
+2. require in this module
+3. call the function that this module exports with the following:
 
-2. create a .env file with 
-  ```
-  SLACK_TOKEN=xxxxxx
-  METAMAP_ID=XX
-  ```
-  replacing the all the x's with valid values. 
-  The METAMAP_ID will be the map that any topics you create get posted to
+```
+var Bot = require('create-from-slack');
 
-3. run `npm install`
+var team = {
+  bot_team_id: 'T1029922J1',
+  bot_access_token: 'asdasdifuajskdfjasdlfjsasdflkjasj'
+};
 
-4. run `node main.js`
+var tokens = {
+// key is the slack user id, value is the token for metamaps
+  U10292FF9: 'xoodasfaUUAS99a9ss',
+  U8D887D90: 'adiuaIIu9999a9sdf9'
+};
 
-5. go to metamaps and retrieve an access token for your user by going to the home page, signing in, and then opening the console. 
-  With the javascript console open, run
-  ```
-  var token = $.post('/api/v1/tokens', { token: { description: 'token for slack' }});
-  token.responseJSON.tokens[0].token
-  ```
-  copy that token value into your clipboard
+// you must be running some kind of server that can verify as an authorized application to the metamaps instance
+// you wish to integrate with. 
+// users will be directed to this URL, and then redirected to authorize with metamaps, 
+// if they don't have a token
+var signInUrl = 'https://metamapper.herokuapp.com/sign_in';
 
-6. go to slack, and open a direct message conversation with your bot, then type in 
-  ```
-  token XXXXXXX
-  ```
-  and replace the X's with your token from metamaps
+// the domain of the metamaps instance you wish to integrate with
+var metamapsDomain = 'https://metamaps.cc';
 
-7. in any channel that your bot is in, including your private chat with it, you can create topics onto your map
-  You can do this by first adding the emoji which represents the metacode you want to use, for example
-  ```
-  :group:
-  ```
-  then add a space, then type the name for the topic
-  ```
-  :group: My Group
-  ```
-  You must put only one topic in each message for now. 
-  Note: you will only be able to create topics of the types which are listed in the `metamaps.js` file under metacodes
+var addNewUserToken = Bot(team, tokens, signInUrl, metamapsDomain);
 
+// call this function to add a token for another slack user
+addNewUserToken(userWhateverId, tokenForUser);
+```
+
+see https://github.com/metamaps/metamapper/blob/master/server.js for an example
