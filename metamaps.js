@@ -75,17 +75,16 @@ var toExport = {
     topic.permission = 'commons';
     request.post({
       url: topicCreateUrl,
-      form: { topic: topic },
-      headers: {
-        Authorization: 'Token token=' + token
+      form: {
+        access_token: token,
+        topic: topic
       }
     }, function (err, response, body) {
-      var body = JSON.parse(body);
-      console.log(body);
-      if (err) {
-        console.log(err);
+      if (err || response.statusCode > 200) {
+        console.log(err || response.statusCode);
         return callback('topic failed');
       }
+      var body = JSON.parse(body);
       var topicId = body.topics[0].id;
       var mapping = {
         mappable_id: topicId,
@@ -96,13 +95,13 @@ var toExport = {
       };
       request.post({
         url: mappingCreateUrl,
-        form: { mapping: mapping },
-        headers: {
-          Authorization: 'Token token=' + token
+        form: {
+          access_token: token,
+          mapping: mapping
         }
       }, function (err, response, body) {
-        if (err) {
-          console.log(err);
+        if (err || response.statusCode > 200) {
+          console.log(err || response.statusCode);
           return callback('mapping failed', topicId);
         }
         var body = JSON.parse(body);
@@ -112,17 +111,14 @@ var toExport = {
   },
   getMap: function (id, token, callback) {
     request.get({
-      url: mapUrl + id,
-      headers: {
-        Authorization: 'Token token=' + token
-      }
+      url: mapUrl + id + '?access_token=' + token
     }, function (err, response, body) {
-      if (err) {
+      if (err || response.statusCode > 200) {
+        console.log(err || response.statusCode);
         return callback(err);
       }
       var body = JSON.parse(body);
-      var topics = body.topics;
-      callback(null, topics);
+      callback(null, body.topics);
     });
   },
   createMap: function (name, token, callback) {
@@ -133,13 +129,13 @@ var toExport = {
     };
     request.post({
       url: mapCreateUrl,
-      form: { map: map },
-      headers: {
-        Authorization: 'Token token=' + token
+      form: {
+        access_token: token,
+        map: map
       }
     }, function (err, response, body) {
-      if (err) {
-        console.log(err);
+      if (err || response.statusCode > 200) {
+        console.log(err || response.statusCode);
         return callback('creating map failed');
       }
       var body = JSON.parse(body);
