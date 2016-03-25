@@ -1,4 +1,4 @@
-module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL) {
+module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signInUrl) {
   var Metamaps = require('./metamaps.js')(METAMAPS_URL);
   var metacodes = Metamaps.metacodes;
   var mapsForChannel = {};
@@ -41,18 +41,20 @@ function postTopicsToMetamaps(topics, userId, channel) {
 
   var COMMANDS = [
     {
-      cmd: "token ",
-      variable: "[TOKEN]",
-      helpText: "verify yourself as a particular user for creating information. can only be done in private chat with metamapper",
+      cmd: "signed in?",
+      variable: "",
+      helpText: "check whether you're account is connected to your metamaps account",
       requireUser: false,
       check: function (message) {
-        return message.channel[0] == "D";
+        return true;
       },
       run: function (message) {
-        var userToken = message.text.substring(6);
-        tokens[message.user] = userToken;
-        if (persistToken) persistToken(message.user, userToken);
-        rtm.sendMessage('Ok, I\'ve set your token for use on metamaps', message.channel);
+        if (tokens[message.user]) {
+          rtm.sendMessage('Yes, you\'re signed in to metamaps.', message.channel);
+        } else {
+          var id = rtm.activeTeamId + message.user;
+          rtm.sendMessage('Nope. You\'re not signed in to metamaps. Click here to sign in: ' + signInUrl + '?id=' + id, message.channel); 
+        }
       }
     },
     {

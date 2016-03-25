@@ -17,7 +17,7 @@ function dmForUserId(userId) {
   return channel;
 }
 
-var COMMANDS = require('./commands.js')(rtm, tokens, persistToken, botId, METAMAPS_URL);
+var COMMANDS = require('./commands.js')(rtm, tokens, persistToken, botId, METAMAPS_URL, authUrl);
 
 function verified(message) {
   if (!tokens[message.user]) {
