@@ -81,7 +81,8 @@ var toExport = {
       }
     }, function (err, response, body) {
       if (err || response.statusCode > 200) {
-        console.log(err || response.statusCode);
+        console.log(err || 'statusCode: ' + response.statusCode);
+        console.log('body: ', body);
         return callback('topic failed');
       }
       var body = JSON.parse(body);
@@ -101,7 +102,8 @@ var toExport = {
         }
       }, function (err, response, body) {
         if (err || response.statusCode > 200) {
-          console.log(err || response.statusCode);
+          console.log(err || 'statusCode: ' + response.statusCode);
+          console.log('body: ', body);
           return callback('mapping failed', topicId);
         }
         var body = JSON.parse(body);
@@ -114,7 +116,8 @@ var toExport = {
       url: mapUrl + id + '?access_token=' + token
     }, function (err, response, body) {
       if (err || response.statusCode > 200) {
-        console.log(err || response.statusCode);
+        console.log(err || 'statusCode: ' + response.statusCode);
+        console.log('body: ', body);
         return callback(err);
       }
       var body = JSON.parse(body);
@@ -135,7 +138,8 @@ var toExport = {
       }
     }, function (err, response, body) {
       if (err || response.statusCode > 200) {
-        console.log(err || response.statusCode);
+        console.log(err || 'statusCode: ' + response.statusCode);
+        console.log('body: ', body);
         return callback('creating map failed');
       }
       var body = JSON.parse(body);
