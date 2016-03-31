@@ -4,26 +4,6 @@ module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signI
   var mapsForChannel = {};
   var metacodesForChannel = {};
 
-function getTopicsFromText(text) {
-  var topics = [];
-  if (!text) return topics;
-  metacodes.forEach(function (m) {
-    var split = text.split(':');
-    if (split[1] && split[1] == m[0]) {
-      topics.push({
-        metacode_id: m[1],
-        name: split[2].trim()
-      });
-    }
-  });
-  return topics;
-}
-
-function messageContainsMetacodes(text) {
-  var topics = getTopicsFromText(text);
-  return topics.length > 0;
-}
-
 function postTopicsToMetamaps(topics, userId, channel) {
   var addToMap = mapsForChannel[channel];
   topics.forEach(function (topic) {
@@ -53,7 +33,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
           rtm.sendMessage('Yes, you\'re signed in to metamaps.', message.channel);
         } else {
           var id = rtm.activeTeamId + message.user;
-          rtm.sendMessage('Nope. You\'re not signed in to metamaps. Click here to sign in: ' + signInUrl + '?id=' + id, message.channel); 
+          rtm.sendMessage('Nope. You\'re not signed in to metamaps. Click here to sign in: ' + signInUrl + '?id=' + id, message.channel);
         }
       }
     },
@@ -79,12 +59,26 @@ function postTopicsToMetamaps(topics, userId, channel) {
         return true;
       },
       run: function (message) {
-        Metamaps.getMap(message.text.substring(9), tokens[message.user], function (err, topics) {
+        var id = message.text.substring(9);
+        Metamaps.getMap(id, tokens[message.user], function (err, topics) {
           if (err) {
             return rtm.sendMessage('there was an error retrieving the map', message.channel);
           }
-          rtm.sendMessage(Metamaps.formatTopicsForDisplay(topics), message.channel);
+          rtm.sendMessage(Metamaps.formatTopicsForDisplay(topics) + '\n' + METAMAPS_URL + '/maps/' + id, message.channel);
         });
+      }
+    },
+    {
+      cmd: "open map ",
+      variable: "[MAP_ID]",
+      helpText: "return a link to open the map",
+      requireUser: false,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        var id = message.text.substring(9);
+        rtm.sendMessage(METAMAPS_URL + '/maps/' + id, message.channel);
       }
     },
     {
@@ -138,8 +132,8 @@ function postTopicsToMetamaps(topics, userId, channel) {
           return;
         }
         var topic_name = message.text.substring(4);
-        postTopicsToMetamaps([ 
-          { metacode_id: metacodesForChannel[message.channel], name: topic_name.trim() } 
+        postTopicsToMetamaps([
+          { metacode_id: metacodesForChannel[message.channel], name: topic_name.trim() }
         ], message.user, message.channel);
       }
     },
@@ -157,18 +151,6 @@ function postTopicsToMetamaps(topics, userId, channel) {
           help += '*' + command.cmd + command.variable + '* ' + command.helpText + '\n';
         });
         rtm.sendMessage(help, message.channel);
-      }
-    },
-    {
-      cmd: "",
-      variable: "",
-      helpText: "create a topic by specifying a metacode, like :person: Cool Dude",
-      requireUser: true,
-      check: function (message) {
-        return messageContainsMetacodes(message.text);
-      },
-      run: function (message) {
-        postTopicsToMetamaps(getTopicsFromText(message.text), message.user, message.channel);    
       }
     }
   ];

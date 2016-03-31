@@ -6,57 +6,61 @@ var rootUrl,
     mapUrl;
 
 function randomCoord() {
-  var min = -300, max = 300;
+  var min = -600, max = 600;
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
 var toExport = {
   metacodes: [
     // first column is slack emoji name, second column is metacode id
-        ['catalyst', 281110143],
-	['closed', 1018350795],
-	['implication', 507103779],
-	['trajectory', 572488568],
-	['argument', 897489149],
-	['goodpractice', 86478831],
-	['idea', 991788158],
-	['note', 1065847166],
-	['foresight', 790035682],
-	['futuredev', 374648174],
-	['group', 638205575],
-	['insight', 457008489],
-	['intention', 587967610],
-	['knowledge', 21578242],
-	['location', 241469500],
-	['openissue', 339908452],
-	['opportunity', 510532105],
-	['person', 125146708],
-	['list', 693380443],
-	['pro', 265886353],
-	['reference', 332043025],
-	['platform', 92282751],
-	['problem', 112740059],
-	['resource', 513966844],
-	['role', 852568144],
-	['task', 18300813],
-	['con', 1004708648],
-	['decision', 1019539926],
-	['example', 392363334],
-	['experience', 51848956],
-	['opinion', 1047793131],
-	['moviemap', 96424412],
-	['requirement', 47226117],
-	['wildcard', 116022259],
-	['vision', 1065847227],
-	['intent', 1065847225],
-	['insight', 1065847224],
-	['strategy', 1065847231],
-	['pattern', 1065847180],
-	['bizarre', 113629430],
-	['tool', 306309279],
-	['action', 980190962],
-	['activity', 298486374],
-	['question', 946642823]
+    ["Location", 21578242],
+    ["Experience", 51848956],
+    ["Question", 92282751],
+    ["Action", 100698720],
+    ["Reference", 112740059],
+    ["Process", 113629430],
+    ["Problem", 125146708],
+    ["Open Issue", 241469500],
+    ["Catalyst", 281110143],
+    ["Group", 298486374],
+    ["Feedback", 339908452],
+    ["Future Dev", 374648174],
+    ["Role", 378666952],
+    ["Need", 434890094],
+    ["Intention", 457008489],
+    ["Insight", 507103779],
+    ["Platform", 510532105],
+    ["Task", 513543911],
+    ["Trajectory", 546325864],
+    ["Knowledge", 587967610],
+    ["Idea", 638205575],
+    ["Resource", 843966974],
+    ["Tool", 854565971],
+    ["Activity", 912136629],
+    ["Person", 980190962],
+    ["Implication", 991788158],
+    ["Closed", 1018350795],
+    ["Opportunity", 1047793131],
+    ["Argument", 1047793132],
+    ["Con", 1047793133],
+    ["Decision", 1047793134],
+    ["Example", 1047793135],
+    ["Aim", 1047793136],
+    ["Good Practice", 1047793137],
+    ["List", 1047793138],
+    ["Story", 1047793139],
+    ["Note", 1047793140],
+    ["Pro", 1047793141],
+    ["Research", 1047793142],
+    ["Wildcard", 1047793143],
+    ["Subject", 1047793144],
+    ["Event", 1047793145],
+    ["Media", 1047793146],
+    ["Metamap", 1047793147],
+    ["Model", 1047793148],
+    ["Perspective", 1047793149],
+    ["Project", 1047793150],
+    ["Status", 1047793151]
   ],
   findMetacodeByNameOrId: function (nameOrId) {
     var m;
@@ -148,11 +152,11 @@ var toExport = {
   },
   formatTopicsForDisplay: function (topics) {
     var string = '';
-    
+
     topics.forEach(function (t) {
-      string += ':' + toExport.findMetacodeName(t.metacode_id) + ': ' + t.name + ' \n';
+      string += t.name + ' (' + toExport.findMetacodeName(t.metacode_id) + ') \n';
     });
-    
+
     return string;
   }
 }
