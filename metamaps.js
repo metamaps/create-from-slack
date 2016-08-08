@@ -1,7 +1,9 @@
 var request = require('request');
 var rootUrl,
+    synapseCreateUrl,
     topicCreateUrl,
     mappingCreateUrl,
+    mappingDeleteUrl,
     mapCreateUrl,
     mapUrl;
 
@@ -61,6 +63,53 @@ var toExport = {
     ["Perspective", 1047793149],
     ["Project", 1047793150],
     ["Status", 1047793151]
+    /*["Action", 1],
+    ["Activity", 2],
+    ["Catalyst", 3],
+    ["Closed", 4],
+    ["Process", 5],
+    ["Future", 6],
+    ["Group", 7],
+    ["Implication", 8],
+    ["Insight", 9],
+    ["Intention", 10],
+    ["Knowledge", 11],
+    ["Location", 12],
+    ["Need", 13],
+    ["Open", 14],
+    ["Opportunity", 15],
+    ["Person", 16],
+    ["Platform", 17],
+    ["Problem", 18],
+    ["Resource", 19],
+    ["Role", 20],
+    ["Task", 21],
+    ["Trajectory", 22],
+    ["Argument", 23],
+    ["Con", 24],
+    ["Subject", 25],
+    ["Decision", 26],
+    ["Event", 27],
+    ["Example", 28],
+    ["Experience", 29],
+    ["Feedback", 30],
+    ["Aim", 31],
+    ["Good", 32],
+    ["Idea", 33],
+    ["List", 34],
+    ["Media", 35],
+    ["Metamap", 36],
+    ["Model", 37],
+    ["Note", 38],
+    ["Perspective", 39],
+    ["Pro", 40],
+    ["Project", 41],
+    ["Question", 42],
+    ["Reference", 43],
+    ["Research", 44],
+    ["Status", 45],
+    ["Tool", 46],
+    ["Wildcard", 47]*/
   ],
   findMetacodeByNameOrId: function (nameOrId) {
     var m;
@@ -115,6 +164,60 @@ var toExport = {
       });
     });
   },
+  addSynapseToMap: function (map, synapse, token, callback) {
+    synapse.permission = 'commons';
+    request.post({
+      url: synapseCreateUrl,
+      form: {
+        access_token: token,
+        synapse: synapse
+      }
+    }, function (err, response, body) {
+      if (err || response.statusCode > 200) {
+        console.log(err || 'statusCode: ' + response.statusCode);
+        console.log('body: ', body);
+        return callback('synapse failed');
+      }
+      var body = JSON.parse(body);
+      var synapseId = body.synapses[0].id;
+      var mapping = {
+        mappable_id: synapseId,
+        mappable_type: 'Synapse',
+        map_id: map
+      };
+      request.post({
+        url: mappingCreateUrl,
+        form: {
+          access_token: token,
+          mapping: mapping
+        }
+      }, function (err, response, body) {
+        if (err || response.statusCode > 200) {
+          console.log(err || 'statusCode: ' + response.statusCode);
+          console.log('body: ', body);
+          return callback('mapping failed', topicId);
+        }
+        var body = JSON.parse(body);
+        callback(null, synapseId, body.mappings[0].id);
+      });
+    });
+  },
+  deleteMapping: function (id, token, callback) {
+    request({
+      method: 'DELETE',
+      url: mappingDeleteUrl + '/' + id,
+      form: {
+        access_token: token
+      }
+    }, function (err, response, body) {
+      if (err || response.statusCode > 200) {
+        console.log(err || 'statusCode: ' + response.statusCode);
+        console.log('body: ', body);
+        return callback('deleting mapping failed');
+      }
+      callback(null);
+    });
+  },
   getMap: function (id, token, callback) {
     request.get({
       url: mapUrl + id + '?access_token=' + token
@@ -125,7 +228,7 @@ var toExport = {
         return callback(err);
       }
       var body = JSON.parse(body);
-      callback(null, body.topics);
+      callback(null, body);
     });
   },
   createMap: function (name, token, callback) {
@@ -164,8 +267,10 @@ var toExport = {
 module.exports = function (METAMAPS_URL) {
   rootUrl = METAMAPS_URL + '/api/v1';
   topicCreateUrl = rootUrl + '/topics';
+  synapseCreateUrl = rootUrl + '/synapses';
   mappingCreateUrl = rootUrl + '/mappings';
+  mappingDeleteUrl = rootUrl + '/mappings'; // + ID
   mapCreateUrl = rootUrl + '/maps';
-  mapUrl = rootUrl + '/maps/';
+  mapUrl = rootUrl + '/maps/'; // + ID
   return toExport;
 }

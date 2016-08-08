@@ -1,28 +1,48 @@
-module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signInUrl) {
-  var Metamaps = require('./metamaps.js')(METAMAPS_URL);
-  var metacodes = Metamaps.metacodes;
-  var mapsForChannel = {};
-  var metacodesForChannel = {};
+module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signInUrl, dmForUserId, userName, projectMapId, setProjectMap, teamName) {
+  var Metamaps = require('./metamaps.js')(METAMAPS_URL)
+  var projects = require('./projects.js')(METAMAPS_URL)
+  var metacodes = Metamaps.metacodes
+  var mapsForChannel = {}
+  var metacodesForChannel = {}
 
-function postTopicsToMetamaps(topics, userId, channel) {
-  var addToMap = mapsForChannel[channel];
-  topics.forEach(function (topic) {
-    Metamaps.addTopicToMap(addToMap, topic, tokens[userId], function (err, topicId, mappingId) {
-      if (err == 'topic failed') {
-        rtm.sendMessage('failed to create your topic', channel);
-      } else if (err == 'mapping failed') {
-        rtm.sendMessage('successfully created topic (id: ' + topicId + '), but failed to add it to map ' + addToMap, channel);
-      } else {
-        rtm.sendMessage('successfully created topic and added it to map ' + addToMap, channel);
+  if (projectMapId) projects.setProjectMapId(projectMapId)
+
+  function postTopicsToMetamaps(topics, userId, channel) {
+    var addToMap = mapsForChannel[channel]
+    topics.forEach(function (topic) {
+      Metamaps.addTopicToMap(addToMap, topic, tokens[userId], function (err, topicId, mappingId) {
+        if (err == 'topic failed') {
+          rtm.sendMessage('failed to create your topic', channel)
+        } else if (err == 'mapping failed') {
+          rtm.sendMessage('successfully created topic (id: ' + topicId + '), but failed to add it to map ' + addToMap, channel)
+        } else {
+          rtm.sendMessage('successfully created topic and added it to map ' + addToMap, channel)
+        }
+      })
+    })
+  }
+
+  function setLocalProjectMap (mapId, channel) {
+    projectMapId = mapId // set within this function
+    projects.setProjectMapId(mapId) // update the projects module
+    setProjectMap(mapId) // save to database
+    rtm.sendMessage('Map for projects was updated', channel)
+  }
+
+  function createMapForProjects(token, channel) {
+    Metamaps.createMap(teamName + " Projects", token, function (err, id) {
+      if (!err) {
+        setLocalProjectMap(id, channel)
+        rtm.sendMessage('You can now use the projects functionality', channel)
       }
-    });
-  });
-}
+    })
+  }
 
   var COMMANDS = [
     {
       cmd: "signed in?",
       variable: "",
+      inHelpList: true,
       helpText: "check whether you're account is connected to your metamaps account",
       requireUser: false,
       check: function (message) {
@@ -40,6 +60,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
     {
       cmd: "set map ",
       variable: "[MAP_ID]",
+      inHelpList: true,
       helpText: "set the map on which new topics created in that channel will appear",
       requireUser: false,
       check: function (message) {
@@ -53,6 +74,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
     {
       cmd: "show map ",
       variable: "[MAP_ID]",
+      inHelpList: true,
       helpText: "return all the topics for a given map id in a list",
       requireUser: true,
       check: function (message) {
@@ -60,17 +82,18 @@ function postTopicsToMetamaps(topics, userId, channel) {
       },
       run: function (message) {
         var id = message.text.substring(9);
-        Metamaps.getMap(id, tokens[message.user], function (err, topics) {
+        Metamaps.getMap(id, tokens[message.user], function (err, map) {
           if (err) {
             return rtm.sendMessage('there was an error retrieving the map', message.channel);
           }
-          rtm.sendMessage(Metamaps.formatTopicsForDisplay(topics) + '\n' + METAMAPS_URL + '/maps/' + id, message.channel);
+          rtm.sendMessage(Metamaps.formatTopicsForDisplay(map.topics) + '\n' + METAMAPS_URL + '/maps/' + id, message.channel);
         });
       }
     },
     {
       cmd: "open map ",
       variable: "[MAP_ID]",
+      inHelpList: true,
       helpText: "return a link to open the map",
       requireUser: false,
       check: function (message) {
@@ -84,6 +107,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
     {
       cmd: "create map ",
       variable: "[NAME_OF_MAP]",
+      inHelpList: true,
       helpText: "create a map on metamaps by specifying its name",
       requireUser: true,
       check: function (message) {
@@ -102,6 +126,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
     {
       cmd: "set metacode ",
       variable: "[EMOJI_NAME]",
+      inHelpList: true,
       helpText: "set the default metacode to use for the channel",
       requireUser: false,
       check: function (message) {
@@ -121,6 +146,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
     {
       cmd: "mm: ",
       variable: "[TOPIC_NAME]",
+      inHelpList: true,
       helpText: "use default metacode for the channel to create a topic",
       requireUser: true,
       check: function (message) {
@@ -138,8 +164,83 @@ function postTopicsToMetamaps(topics, userId, channel) {
       }
     },
     {
+      cmd: "projects",
+      variable: "",
+      inHelpList: true,
+      helpText: "see who is working on what projects",
+      requireUser: false,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        if (projectMapId) {
+          projects.displayAll(tokens[message.user], function (err, prjcts) {
+            if (err) {
+              console.log(err)
+              prjcts = 'There was an error fetching your projects. Try again?'
+            }
+            if (!prjcts) prjcts = 'There are no active projects'
+            rtm.sendMessage(prjcts, message.channel)
+          })
+        }
+        else if (tokens[message.user]) createMapForProjects(tokens[message.user], message.channel)
+      }
+    },
+    {
+      cmd: "my projects",
+      variable: "",
+      inHelpList: true,
+      helpText: "see my projects and collaborators",
+      requireUser: true,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        if (projectMapId) {
+          projects.displayForUser(userName(message.user), tokens[message.user], function (err, prjcts) {
+            if (err) {
+              console.log(err)
+              prjcts = 'There was an error fetching your projects. Try again?'
+            }
+            if (!prjcts) prjcts = 'You have no active projects'
+            rtm.sendMessage(prjcts, message.channel)
+          })
+        }
+        else if (tokens[message.user]) createMapForProjects(tokens[message.user], message.channel)
+      }
+    },
+    {
+      cmd: "<@" + botId + '>: update projects',
+      variable: "",
+      inHelpList: true,
+      helpText: "update who is working on what projects",
+      requireUser: false,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        if (projectMapId) projects.getUpdates(rtm, tokens, dmForUserId, userName)
+        else if (tokens[message.user]) createMapForProjects(tokens[message.user], message.channel)
+      }
+    },
+    {
+      cmd: 'set project map id ',
+      variable: "[MAP_ID]",
+      inHelpList: false,
+      helpText: "set the map which stores project data",
+      requireUser: false,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        var mapId = message.text.substring(19)
+        setLocalProjectMap(mapId, message.channel)
+      }
+    },
+    {
       cmd: "<@" + botId + '>: help',
       variable: "",
+      inHelpList: true,
       helpText: "list all the commands that metamapper knows",
       requireUser: false,
       check: function (message) {
@@ -148,7 +249,7 @@ function postTopicsToMetamaps(topics, userId, channel) {
       run: function (message) {
         var help = 'Hi de ho heyo!\n';
         COMMANDS.forEach(function (command) {
-          help += '*' + command.cmd + command.variable + '* ' + command.helpText + '\n';
+          if (command.inHelpList) help += '*' + command.cmd + command.variable + '* ' + command.helpText + '\n';
         });
         rtm.sendMessage(help, message.channel);
       }

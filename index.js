@@ -1,4 +1,4 @@
-module.exports = function (team, dbTokens, authUrl, METAMAPS_URL, persistToken) {
+module.exports = function (team, projectMapId, setProjectMap, dbTokens, authUrl, METAMAPS_URL, persistToken) {
 
 var CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 var RtmClient = require('@slack/client').RtmClient;
@@ -17,7 +17,12 @@ function dmForUserId(userId) {
   return channel;
 }
 
-var COMMANDS = require('./commands.js')(rtm, tokens, persistToken, botId, METAMAPS_URL, authUrl);
+function userName(userId) {
+  var user = dataStore.getUserById(userId)
+  return user ? user.name : null
+}
+
+var COMMANDS = require('./commands.js')(rtm, tokens, persistToken, botId, METAMAPS_URL, authUrl, dmForUserId, userName, projectMapId, setProjectMap, team.name);
 
 function verified(message) {
   if (!tokens[message.user]) {
@@ -30,7 +35,7 @@ function verified(message) {
 
 rtm.on(RTM_EVENTS.MESSAGE, function (message) {
   if (!message.text) return;
-  
+
   var ran;
   COMMANDS.forEach(function (command) {
     if (!ran &&
@@ -45,6 +50,6 @@ rtm.on(RTM_EVENTS.MESSAGE, function (message) {
 
   return function addTokenForUser(userId, token) {
     tokens[userId] = token;
-    rtm.sendMessage('Nice! You are now authorized with metamaps.', dmForUserId(userId)); 
+    rtm.sendMessage('Nice! You are now authorized with metamaps.', dmForUserId(userId));
   }
 } // end module.exports
