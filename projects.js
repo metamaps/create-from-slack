@@ -134,24 +134,30 @@ var toExport = {
         rtm.sendMessage(text, dm)
       }
 
-      function yesNoQstn(question, yes, no) {
-        send(question + ins())
+      function yesNoQstn(question, yes, no, dontMessage) {
+        if (!dontMessage) send(question + ins())
         rtm.once(RTM_EVENTS.MESSAGE, function (message) {
-          if (message.channel !== dm) return
+          if (message.channel !== dm) {
+            yesNoQstn(question, yes, no, true)
+            return
+          }
           else if (YES_ANSWERS.indexOf(message.text) > -1) return yes()
           else if (NO_ANSWERS.indexOf(message.text) > -1) return no()
           else if (message.text === 'cancel') {
             send('Ok, let\'s continue the conversation later.')
           }
           else {
-            yesNoQstn(question, yes, no)
+            yesNoQstn(question, yes, no, true)
           }
         })
       }
 
       function actionTillDone(action, done) {
         rtm.once(RTM_EVENTS.MESSAGE, function (message) {
-          if (message.channel !== dm) return
+          if (message.channel !== dm) {
+            actionTillDone(action, done)
+            return
+          }
           else if (message.text === 'done') return done()
           else {
             action(message.text)
