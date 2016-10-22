@@ -139,7 +139,7 @@ var toExport = {
         return callback('topic failed');
       }
       var body = JSON.parse(body);
-      var topicId = body.topics[0].id;
+      var topicId = body.data.id;
       var mapping = {
         mappable_id: topicId,
         mappable_type: 'Topic',
@@ -160,7 +160,7 @@ var toExport = {
           return callback('mapping failed', topicId);
         }
         var body = JSON.parse(body);
-        callback(null, topicId, body.mappings[0].id);
+        callback(null, topicId, body.data.id);
       });
     });
   },
@@ -179,7 +179,7 @@ var toExport = {
         return callback('synapse failed');
       }
       var body = JSON.parse(body);
-      var synapseId = body.synapses[0].id;
+      var synapseId = body.data.id;
       var mapping = {
         mappable_id: synapseId,
         mappable_type: 'Synapse',
@@ -198,7 +198,7 @@ var toExport = {
           return callback('mapping failed', topicId);
         }
         var body = JSON.parse(body);
-        callback(null, synapseId, body.mappings[0].id);
+        callback(null, synapseId, body.data.id);
       });
     });
   },
@@ -220,7 +220,7 @@ var toExport = {
   },
   getMap: function (id, token, callback) {
     request.get({
-      url: mapUrl + id + '?access_token=' + token
+      url: mapUrl + id + '?access_token=' + token + '&embed=topics'
     }, function (err, response, body) {
       if (err || response.statusCode > 200) {
         console.log(err || 'statusCode: ' + response.statusCode);
@@ -228,7 +228,7 @@ var toExport = {
         return callback(err);
       }
       var body = JSON.parse(body);
-      callback(null, body);
+      callback(null, body.data);
     });
   },
   createMap: function (name, token, callback) {
@@ -250,7 +250,7 @@ var toExport = {
         return callback('creating map failed');
       }
       var body = JSON.parse(body);
-      callback(null, body.maps[0].id);
+      callback(null, body.data.id);
     });
   },
   formatTopicsForDisplay: function (topics) {
@@ -265,7 +265,7 @@ var toExport = {
 }
 
 module.exports = function (METAMAPS_URL) {
-  rootUrl = METAMAPS_URL + '/api/v1';
+  rootUrl = METAMAPS_URL + '/api/v2';
   topicCreateUrl = rootUrl + '/topics';
   synapseCreateUrl = rootUrl + '/synapses';
   mappingCreateUrl = rootUrl + '/mappings';

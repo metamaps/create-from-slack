@@ -92,8 +92,8 @@ var toExport = {
       function addPersonToProject(project) {
         var synapse = {
           desc: 'is working on',
-          node1_id: person,
-          node2_id: project.id,
+          topic1_id: person,
+          topic2_id: project.id,
           category: 'from-to'
         }
         Metamaps.addSynapseToMap(projectMapId, synapse, tokens[userId], function (err, synapseId, mappingId) {
