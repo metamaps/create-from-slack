@@ -210,7 +210,7 @@ module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signI
       }
     },
     {
-      cmd: "<@" + botId + '>: update projects',
+      cmd: "<@" + botId + '> update projects',
       variable: "",
       inHelpList: true,
       helpText: "update who is working on what projects",
@@ -238,7 +238,7 @@ module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signI
       }
     },
     {
-      cmd: "<@" + botId + '>: help',
+      cmd: "<@" + botId + '> help',
       variable: "",
       inHelpList: true,
       helpText: "list all the commands that metamapper knows",
