@@ -125,7 +125,7 @@ module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signI
     },
     {
       cmd: "set metacode ",
-      variable: "[EMOJI_NAME]",
+      variable: "[METACODE_NAME]",
       inHelpList: true,
       helpText: "set the default metacode to use for the channel",
       requireUser: false,

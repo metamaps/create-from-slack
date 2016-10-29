@@ -14,7 +14,7 @@ function randomCoord() {
 
 var toExport = {
   metacodes: [
-    // first column is slack emoji name, second column is metacode id
+    // first column is metacode name, second column is metacode id
     ["Location", 21578242],
     ["Experience", 51848956],
     ["Question", 92282751],
@@ -63,7 +63,8 @@ var toExport = {
     ["Perspective", 1047793149],
     ["Project", 1047793150],
     ["Status", 1047793151]
-    /*["Action", 1],
+/*
+    ["Action", 1],
     ["Activity", 2],
     ["Catalyst", 3],
     ["Closed", 4],
@@ -109,7 +110,8 @@ var toExport = {
     ["Research", 44],
     ["Status", 45],
     ["Tool", 46],
-    ["Wildcard", 47]*/
+    ["Wildcard", 47]
+*/
   ],
   findMetacodeByNameOrId: function (nameOrId) {
     var m;
@@ -220,7 +222,7 @@ var toExport = {
   },
   getMap: function (id, token, callback) {
     request.get({
-      url: mapUrl + id + '?access_token=' + token + '&embed=topics'
+      url: mapUrl + id + '?access_token=' + token + '&embed=topics,synapses,mappings'
     }, function (err, response, body) {
       if (err || response.statusCode > 200) {
         console.log(err || 'statusCode: ' + response.statusCode);
