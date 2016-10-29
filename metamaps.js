@@ -127,7 +127,9 @@ var toExport = {
     return toExport.findMetacodeByNameOrId(name)[1];
   },
   addTopicToMap: function (map, topic, token, callback) {
-    topic.permission = 'commons';
+    topic.permission = topic.permission || 'commons';
+    topic.desc = topic.desc || '';
+    topic.link = topic.link || '';
     request.post({
       url: topicCreateUrl,
       form: {
@@ -167,7 +169,8 @@ var toExport = {
     });
   },
   addSynapseToMap: function (map, synapse, token, callback) {
-    synapse.permission = 'commons';
+    synapse.permission = synapse.permission || 'commons';
+    synapse.desc = synapse.desc || '';
     request.post({
       url: synapseCreateUrl,
       form: {
