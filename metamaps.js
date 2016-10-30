@@ -232,7 +232,7 @@ var toExport = {
       if (err || response.statusCode > 200) {
         console.log(err || 'statusCode: ' + response.statusCode);
         console.log('body: ', body);
-        return callback(err);
+        return callback('fetching map failed');
       }
       var body = JSON.parse(body);
       callback(null, body.data);
@@ -245,7 +245,7 @@ var toExport = {
       if (err || response.statusCode > 200) {
         console.log(err || `statusCode: ${response.statusCode}`);
         console.log(`body: ${body}`);
-        return callback(err);
+        return callback('fetching current user failed');
       }
       var body = JSON.parse(body);
       callback(null, body.data);
@@ -258,7 +258,7 @@ var toExport = {
       if (err || response.statusCode > 200) {
         console.log(err || `statusCode: ${response.statusCode}`);
         console.log(`body: ${body}`);
-        return callback(err);
+        return callback('fetching my maps failed');
       }
       var body = JSON.parse(body);
       callback(null, body.data, body.page);
