@@ -6,6 +6,7 @@ var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 var DataStore = require('@slack/client').MemoryDataStore;
 var dataStore = new DataStore();
 var tokens = dbTokens;
+var users = {};
 var token = team.bot_access_token;
 var botId = team.bot_user_id;
 
@@ -22,7 +23,7 @@ function userName(userId) {
   return user ? user.name : null
 }
 
-var COMMANDS = require('./commands.js')(rtm, tokens, persistToken, botId, METAMAPS_URL, authUrl, dmForUserId, userName, projectMapId, setProjectMap, team.name);
+var COMMANDS = require('./commands.js')(rtm, tokens, users, persistToken, botId, METAMAPS_URL, authUrl, dmForUserId, userName, projectMapId, setProjectMap, team.name);
 
 function verified(message) {
   if (!tokens[message.user]) {

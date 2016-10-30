@@ -1,4 +1,4 @@
-module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signInUrl, dmForUserId, userName, projectMapId, setProjectMap, teamName) {
+module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL, signInUrl, dmForUserId, userName, projectMapId, setProjectMap, teamName) {
   var Metamaps = require('./metamaps.js')(METAMAPS_URL)
   var projects = require('./projects.js')(METAMAPS_URL)
   var metacodes = Metamaps.metacodes
@@ -54,6 +54,38 @@ module.exports = function (rtm, tokens, persistToken, botId, METAMAPS_URL, signI
         } else {
           var id = rtm.activeTeamId + message.user;
           rtm.sendMessage('Nope. You\'re not signed in to metamaps. Click here to sign in: ' + signInUrl + '?id=' + id, message.channel);
+        }
+      }
+    },
+    {
+      cmd: "my maps",
+      variable: "[PAGE]",
+      inHelpList: true,
+      helpText: "see a list of your maps",
+      requireUser: true,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        // once we have the MM user id, we can run this function
+        var getMaps = (userid) => {
+          var page = parseInt(message.text.substring(7)) || 1;
+          Metamaps.getMyMaps(userid, page, tokens[message.user], function (err, maps, pageData) {
+            if (err) {
+              return rtm.sendMessage('there was an error retrieving your maps', message.channel);
+            }
+            rtm.sendMessage(Metamaps.formatMapsForDisplay(maps, pageData) + '\n', message.channel);
+          });
+        }
+
+        // if the MM user id is cached, use it. otherwise, find it.
+        if (users[message.user]) {
+          return getMaps(users[message.user].id);
+        } else {
+          Metamaps.getCurrentUser(tokens[message.user], function (err, user) {
+            users[message.user] = user
+            return getMaps(user.id)
+          })
         }
       }
     },

@@ -5,7 +5,9 @@ var rootUrl,
     mappingCreateUrl,
     mappingDeleteUrl,
     mapCreateUrl,
-    mapUrl;
+    mapsUrl,
+    mapUrl,
+    usersUrl;
 
 function randomCoord() {
   var min = -600, max = 600;
@@ -236,6 +238,32 @@ var toExport = {
       callback(null, body.data);
     });
   },
+  getCurrentUser: function (token, callback) {
+    request.get({
+      url: `${usersUrl}/current?access_token=${token}`
+    }, function (err, response, body) {
+      if (err || response.statusCode > 200) {
+        console.log(err || `statusCode: ${response.statusCode}`);
+        console.log(`body: ${body}`);
+        return callback(err);
+      }
+      var body = JSON.parse(body);
+      callback(null, body.data);
+    });
+  },
+  getMyMaps: function (userid, page, token, callback) {
+    request.get({
+      url: `${mapsUrl}?access_token=${token}&user_id=${userid}&page=${page}`
+    }, function (err, response, body) {
+      if (err || response.statusCode > 200) {
+        console.log(err || `statusCode: ${response.statusCode}`);
+        console.log(`body: ${body}`);
+        return callback(err);
+      }
+      var body = JSON.parse(body);
+      callback(null, body.data, body.page);
+    });
+  },
   createMap: function (name, token, callback) {
     var map = {
       name: name,
@@ -266,6 +294,17 @@ var toExport = {
     });
 
     return string;
+  },
+  formatMapsForDisplay: function (maps, pageData) {
+    var mapList = maps.map(function (m) {
+      return `- [${m.name}](${METAMAPS_URL}/maps/${m.id})\n`;
+    }).join('')
+    var { current_page, total_pages } = pageData
+    if (current_page < total_pages) {
+      mapList += `There are ${total_pages - current_page} more pages.\n`
+      mapList += `Use: \`my maps ${current_page + 1}\` for the next page.\n`
+    }
+    return mapList
   }
 }
 
@@ -276,6 +315,8 @@ module.exports = function (METAMAPS_URL) {
   mappingCreateUrl = rootUrl + '/mappings';
   mappingDeleteUrl = rootUrl + '/mappings'; // + ID
   mapCreateUrl = rootUrl + '/maps';
+  mapsUrl = rootUrl + '/maps';
   mapUrl = rootUrl + '/maps/'; // + ID
+  usersUrl = rootUrl + '/users';
   return toExport;
 }
