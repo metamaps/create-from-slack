@@ -1,5 +1,6 @@
 var request = require('request');
-var rootUrl,
+var noApiRootUrl,
+    rootUrl,
     synapseCreateUrl,
     topicCreateUrl,
     mappingCreateUrl,
@@ -297,7 +298,7 @@ var toExport = {
   },
   formatMapsForDisplay: function (maps, pageData) {
     var mapList = maps.map(function (m) {
-      return `- [${m.name}](${METAMAPS_URL}/maps/${m.id})\n`;
+      return `- ${m.name}: ${noApiRootUrl}/maps/${m.id} \n`;
     }).join('')
     var { current_page, total_pages } = pageData
     if (current_page < total_pages) {
@@ -309,6 +310,7 @@ var toExport = {
 }
 
 module.exports = function (METAMAPS_URL) {
+  noApiRootUrl = METAMAPS_URL;
   rootUrl = METAMAPS_URL + '/api/v2';
   topicCreateUrl = rootUrl + '/topics';
   synapseCreateUrl = rootUrl + '/synapses';
