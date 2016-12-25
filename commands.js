@@ -1,4 +1,4 @@
-module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL, signInUrl, dmForUserId, userName, projectMapId, setProjectMap, teamName) {
+module.exports = function (web, rtm, tokens, users, persistToken, botId, METAMAPS_URL, signInUrl, dmForUserId, userName, projectMapId, setProjectMap, teamName) {
   var Metamaps = require('./metamaps.js')(METAMAPS_URL)
   var projects = require('./projects.js')(METAMAPS_URL)
   var metacodes = Metamaps.metacodes
@@ -7,7 +7,7 @@ module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL
 
   if (projectMapId) projects.setProjectMapId(projectMapId)
 
-  function postTopicsToMetamaps(topics, userId, channel) {
+  function postTopicsToMetamaps(topics, userId, channel, timestamp) {
     var addToMap = mapsForChannel[channel]
     topics.forEach(function (topic) {
       Metamaps.addTopicToMap(addToMap, topic, tokens[userId], function (err, topicId, mappingId) {
@@ -16,7 +16,7 @@ module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL
         } else if (err == 'mapping failed') {
           rtm.sendMessage('successfully created topic (id: ' + topicId + '), but failed to add it to map ' + addToMap, channel)
         } else {
-          rtm.sendMessage('successfully created topic and added it to map ' + addToMap, channel)
+          web.reactions.add('thumbsup', {channel: channel, timestamp: timestamp})
         }
       })
     })
@@ -58,7 +58,7 @@ module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL
       }
     },
     {
-      cmd: "my maps",
+      cmd: "my maps ",
       variable: "[PAGE]",
       inHelpList: true,
       helpText: "see a list of your maps",
@@ -168,7 +168,7 @@ module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL
         var metacode_name = message.text.substring(13);
         var m = Metamaps.findMetacodeByNameOrId(metacode_name);
         if (!m) {
-          rtm.sendMessage(metacode_name + ' isn\'t an enabled slack emoji + metacode. please use the name of the slack emoji, without the colons', message.channel);
+          rtm.sendMessage(metacode_name + ' isn\'t an enabled metacode', message.channel); // list available metacodes?
           return;
         }
         metacodesForChannel[message.channel] = m[1]; // the ID
@@ -186,13 +186,13 @@ module.exports = function (rtm, tokens, users, persistToken, botId, METAMAPS_URL
       },
       run: function (message) {
         if (!metacodesForChannel[message.channel]) {
-          rtm.sendMessage('default metacode is not set. set it by using `set metacode [emoji_metacode_name]`')
+          rtm.sendMessage('default metacode is not set. set it by using `set metacode [metacode_name]`')
           return;
         }
         var topic_name = message.text.substring(4);
         postTopicsToMetamaps([
           { metacode_id: metacodesForChannel[message.channel], name: topic_name.trim() }
-        ], message.user, message.channel);
+        ], message.user, message.channel, message.ts);
       }
     },
     {
