@@ -86,7 +86,7 @@ module.exports = function (web, rtm, tokens, users, persistToken, botId, METAMAP
       },
       run: function (message) {
         if (!metacodesForChannel[message.channel]) {
-          rtm.sendMessage('default metacode is not set. set it by using `set metacode [metacode_name]`')
+          rtm.sendMessage('default metacode is not set. set it by using `set metacode [metacode_name]`', message.channel)
           return;
         }
         var topic_name = message.text;
@@ -157,6 +157,23 @@ module.exports = function (web, rtm, tokens, users, persistToken, botId, METAMAP
       run: function (message) {
         mapsForChannel[message.channel] = message.text.substring(8);
         rtm.sendMessage('Ok, I\'ve switched to map ' + mapsForChannel[message.channel] + ' for this channel', message.channel);
+      }
+    },
+    {
+      cmd: "which map",
+      variable: "",
+      inHelpList: true,
+      helpText: "tell me which map this channel is currently set to",
+      requireUser: false,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        if (mapsForChannel[message.channel]) {
+          rtm.sendMessage('You\'re on map ' + mapsForChannel[message.channel] + ' for this channel', message.channel);   
+        } else {
+          rtm.sendMessage('There is no map set for this channel', message.channel);
+        }
       }
     },
     {
@@ -242,7 +259,7 @@ module.exports = function (web, rtm, tokens, users, persistToken, botId, METAMAP
       },
       run: function (message) {
         if (!metacodesForChannel[message.channel]) {
-          rtm.sendMessage('default metacode is not set. set it by using `set metacode [metacode_name]`')
+          rtm.sendMessage('default metacode is not set. set it by using `set metacode [metacode_name]`', message.channel)
           return;
         }
         var topic_name = message.text.substring(4);
