@@ -4,6 +4,7 @@ module.exports = function (web, rtm, tokens, users, persistToken, botId, METAMAP
   var metacodes = Metamaps.metacodes
   var mapsForChannel = {}
   var metacodesForChannel = {}
+  var captureForChannel = {}
 
   if (projectMapId) projects.setProjectMapId(projectMapId)
 
@@ -39,6 +40,61 @@ module.exports = function (web, rtm, tokens, users, persistToken, botId, METAMAP
   }
 
   var COMMANDS = [
+    {
+      cmd: "start capture",
+      variable: "",
+      inHelpList: true,
+      helpText: "capture every message to the map set for your current channel",
+      requireUser: true,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        if (!mapsForChannel[message.channel]) {
+          rtm.sendMessage('You need to set a map for this channel first. Use \'set map\' or \'create map\'', message.channel);
+          return
+        }
+        captureForChannel[message.channel] = true;
+        rtm.sendMessage('Ok, I will capture every message to map ' + mapsForChannel[message.channel] + ' until you type \'stop capture\'', message.channel);
+      }
+    },
+    {
+      cmd: "stop capture",
+      variable: "",
+      inHelpList: true,
+      helpText: "stop capturing every message to the map set for your current channel",
+      requireUser: true,
+      check: function (message) {
+        return true;
+      },
+      run: function (message) {
+        if (!captureForChannel[message.channel]) {
+          rtm.sendMessage('You weren\'t capturing anywho!', message.channel);
+          return
+        }
+        captureForChannel[message.channel] = false;
+        rtm.sendMessage('Ok, I\'ve stopped capturing every message to the map', message.channel);
+      }
+    },
+    {
+      cmd: "",
+      variable: "",
+      inHelpList: false,
+      requireUser: true,
+      check: function (message) {
+        return captureForChannel[message.channel];
+      },
+      run: function (message) {
+        if (!metacodesForChannel[message.channel]) {
+          rtm.sendMessage('default metacode is not set. set it by using `set metacode [metacode_name]`')
+          return;
+        }
+        var topic_name = message.text;
+        postTopicsToMetamaps([
+          { metacode_id: metacodesForChannel[message.channel], name: topic_name.trim() }
+        ], message.user, message.channel, message.ts);
+      }
+    },
     {
       cmd: "signed in?",
       variable: "",
