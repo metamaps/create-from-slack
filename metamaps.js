@@ -8,11 +8,16 @@ var noApiRootUrl,
     mapCreateUrl,
     mapsUrl,
     mapUrl,
-    usersUrl;
+    usersUrl,
+    coordForMap = {};
 
-function randomCoord() {
-  var min = -600, max = 600;
-  return Math.floor(Math.random() * (max - min)) + min;
+function incrementX(mapId) {
+  if (typeof coordForMap[mapId] !== 'undefined') {
+    coordForMap[mapId] = coordForMap[mapId] + 100;
+  } else {
+      coordForMap[mapId] = 0;
+  }
+  return coordForMap[mapId];
 }
 
 var toExport = {
@@ -152,8 +157,8 @@ var toExport = {
         mappable_id: topicId,
         mappable_type: 'Topic',
         map_id: map,
-        xloc: randomCoord(),
-        yloc: randomCoord()
+        xloc: incrementX(map),
+        yloc: 0
       };
       request.post({
         url: mappingCreateUrl,
