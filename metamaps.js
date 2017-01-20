@@ -119,7 +119,8 @@ var toExport = {
   findMetacodeByNameOrId: function (nameOrId) {
     var m;
     toExport.metacodes.forEach(function (metacode) {
-      if (metacode[0] === nameOrId || metacode[1] === nameOrId) m = metacode;
+      if ((typeof nameOrId === 'string' && metacode[0].toLowerCase() === nameOrId.toLowerCase())
+          || metacode[1] === nameOrId) m = metacode;
     });
     return m;
   },
