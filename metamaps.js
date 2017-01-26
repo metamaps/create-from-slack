@@ -136,8 +136,12 @@ var toExport = {
     return toExport.findMetacodeByNameOrId(name)[1];
   },
   addTopicToMap: function (map, topic, token, callback) {
+    topic.desc = topic.desc || ''
+    if (topic.name.length > 140) {
+      topic.desc = '...' + topic.name.substr(137) + '\n' + topic.desc
+      topic.name = topic.name.slice(0, 137) + '...'
+    }
     topic.permission = topic.permission || 'commons';
-    topic.desc = topic.desc || '';
     topic.link = topic.link || '';
     request.post({
       url: topicCreateUrl,
